@@ -294,7 +294,7 @@ class DeathPoetsCog(commands.Cog):
         datetime_object = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M')
 
         # log_start_time = datetime.strptime(dt_str, '%m/%d/%y')
-        embed = discord.Embed(title=f"Application info.", description=f'Started individual logging {discord.utils.styled_timestamp(datetime_object, "D")}.', color=random.randint(0,0xffffff))
+        embed = discord.Embed(title=f"Application info.", description=f'Due to corruption, started individual logging {discord.utils.styled_timestamp(datetime_object, "D")}.', color=random.randint(0,0xffffff))
         for c in logs[str(ctx.guild.id)]['Users']:
             ids.append(c)
         for id in ids:
@@ -712,22 +712,17 @@ class DeathPoetsCog(commands.Cog):
             7 : '7️⃣',
             8 : '8️⃣'
         }
-        for i in range(1, 5):
+        for i in range(1, 9):
             f = nums[i]
             but = Button(
                 emoji=f,
                 custom_id=f'q|{i}',
                 style=ButtonStyle.grey
             )
-            quan_components[0].add_component(but)
-        for e in range(5,9):
-            f = nums[e]
-            but = Button(
-                emoji=f,
-                custom_id=f'q|{e}',
-                style=ButtonStyle.grey
-            )
-            quan_components[1].add_component(but)
+            if i < 5:
+                quan_components[0].add_component(but)
+            else:
+                quan_components[1].add_component(but)
         global emojis
         emojis = {
             'Life': '<:life:1033436223261392916>',
@@ -1164,9 +1159,6 @@ class DeathPoetsCog(commands.Cog):
                         pot_amnt = get_pot_amnt[2:]
                         pot_list.append(int(pot_amnt))                  
                 users[field['name']['total_pots']] = sum(pot_list)
-
-
-
             #99users[field['name']]['total_pots'] = [x for x in embed_dict['fields'] if any(c for c in pots) in embed_dict['fields']]
         probabilities = []
         total_outcomes = 0
@@ -1176,14 +1168,16 @@ class DeathPoetsCog(commands.Cog):
             ways_to_win = users[str(player)]['player_submissions']
             probability = ways_to_win/total_outcomes
             probabilities.append(probability)
-        try:
-            winner = np.random.choice(players, p=probabilities)
-        except:
-            winner = random.choice(player)
         print(submits)
         print(players)
         print(probabilities)
         print(users)
+        try:
+            if sum(probabilities) == float(1):
+                winner = np.random.choice(players, p=probabilities)
+        except:
+            pass
+            #winner = random.choice(player)
 
         await interaction.respond(f'{winner} won!')
 
@@ -1261,37 +1255,6 @@ class DeathPoetsCog(commands.Cog):
                             field.value = 'Pots Only: **TRUE**'
                         else:
                             field.value = 'Pots Only: **FALSE**'
-    # @commands.Cog.slash_command(
-    #     base_name='raffle',
-    #     base_desc='Raffle settings and set up.',
-    #     name='start',
-    #     description='Start the current raffle.',
-    #     default_required_permissions=Permissions(manage_messages=True))
-    # async def raffle_start(self, ctx: APPCI):
-    #     components = [ActionRow(
-    #         Button(label='Choose Winner',
-    #         custom_id='win',
-    #         style=ButtonStyle.grey)
-    #     )]
-    #     if raffle_started == True and ctx.author == raffle_author:
-    #         embed_dict = raffle_embed.to_dict()
-    #         users = {}
-    #         for field in embed_dict['fields']:
-    #             users[field['name']] = {}
-    #             users[field['name']] = field['value']
-    #         print(users)
-    #         embed = discord.Embed(title='Choose winner:', description='')
-    #         embed.set_author(name=f'{str(ctx.author)}', icon_url=ctx.author.avatar_url)
-    #         embed.add_field(name='Probabilities', value='', inline=True)
-    #         await ctx.respond("Click the button below to choose a random winner:", components=components)
-    #         interaction, button = await self.bot.wait_for('button_click', check=lambda x: x.author == ctx.author)
-    #         await interaction.defer()
-    #         button_id = button.custom_id
-    #         if button_id == "win":
-    #             pass
-    #     else:
-    #         await ctx.respond('No raffle has been started.', hidden=True)
-    #         return
         
 
 async def raffle_submission(self, interaction, submission, message = None):
