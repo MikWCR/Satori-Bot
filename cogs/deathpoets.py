@@ -590,7 +590,7 @@ class DeathPoetsCog(commands.Cog):
                 submission = {key: value for key, value in zip(potion_select_menu.values, pots_quan)}
                 logging.info(submission)
 
-                await enter.edit(content='Your pots have been submitted successfully.', components=[])
+                await enter.edit(content='Your pots have been submitted successfully, and are now awaiting approval.', components=[])
 
                 await raffle_submission(self, interaction=interaction, submission=submission, message=enter)
               
@@ -615,7 +615,7 @@ class DeathPoetsCog(commands.Cog):
                 yn_button_id = yes_no_button.custom_id
                 if yn_button_id == 'yes':
                     submission[f'{potion_select_menu.values[0]}'] = pot_quantity
-                    await pot_select_msg.edit(content='Your item has been submitted.', components=[])
+                    await pot_select_msg.edit(content='Your item has been submitted, and is awaiting approval.', components=[])
                 else:
                     await pot_select_msg.edit(content="Item not submitted.", components = [])
                     return 
@@ -640,7 +640,7 @@ class DeathPoetsCog(commands.Cog):
             else:
                 await quantity_interaction.defer()
                 ring_quantity = quantity_button.custom_id[2:]
-                await submit_msg.edit(content=f'You\'ve successfully submitted {ring_quantity}x{ring_emoji}!', components=[])
+                await submit_msg.edit(content=f'Your submission of {ring_quantity}x{ring_emoji} is pending...', components=[])
                 submission[ring_type] = ring_quantity
                 await raffle_submission(self, interaction=interaction, submission=submission, message=submit_msg)
         #########ARMOR SELECTION##########
@@ -696,7 +696,7 @@ class DeathPoetsCog(commands.Cog):
             else:
                 await quantity_interaction.defer()
                 weapon_quantity = quantity_button.custom_id[2:]
-                await quantity_button_msg.edit(content=f'You\'ve successfully submitted {weapon_quantity}x{weapon_emoji}!', components = [])
+                await quantity_button_msg.edit(content=f'Your submission of {weapon_quantity}x{weapon_emoji} is pending...', components = [])
                 submission[weapon_type] = weapon_quantity
                 await raffle_submission(self, interaction=interaction, submission=submission, message=quantity_button_msg)
                      
@@ -719,7 +719,7 @@ class DeathPoetsCog(commands.Cog):
             else:
                 await quantity_interaction.defer()
                 armor_quantity = quantity_button.custom_id[2:]
-                await quantity_button_msg.edit(content=f'You\'ve successfully submitted {armor_quantity}x{armor_emoji}!', components = [])
+                await quantity_button_msg.edit(content=f'Your submission of {armor_quantity}x{armor_emoji} is pending...', components = [])
                 submission[armor_type] = armor_quantity
                 await raffle_submission(self, interaction=interaction, submission=submission, message=quantity_button_msg)
         
@@ -950,8 +950,10 @@ class DeathPoetsCog(commands.Cog):
         for user in guild_mems:
             if winner == str(user):
                 user_id = user.id
-
-        await interaction.respond(f'Congratulations <@{user_id}>, you have won the raffle! Contact {raffle_author} to claim your items.')
+        try:
+            await interaction.respond(f'Congratulations <@{user_id}>, you have won the raffle! Contact {raffle_author} to claim your items.')
+        except:
+            await interaction.respond(f'Congratulations <@{winner}>, you have won the raffle!')
 
 
     @commands.Cog.slash_command(
@@ -979,7 +981,7 @@ class DeathPoetsCog(commands.Cog):
                 await ctx.respond("No raffle found.", hidden=True)
                 return
         else:
-            await ctx.respond("Only the raffle author can press this button.", hidden=True)
+            await ctx.respond("Only the raffle author can use this.", hidden=True)
             return
 
     '''I think the staffer who's creating the raffle should be able to restrict potions. 
@@ -1210,63 +1212,182 @@ class DeathPoetsCog(commands.Cog):
         await component_msg.edit(content=content, components=[])
         await setting_msg.edit(embed=e, components=setting_comps)
 
+    @commands.Cog.slash_command(
+        base_name='raffle',
+        base_desc='test raffle with randomized entries and players',
+        name='test',
+        description='test raffle with variables',
+        default_required_permissions=Permissions(manage_messages=True),
+        guild_ids=[374716378655227914, 972473224845729802]
+        )
+    async def raffle_test(self, ctx: APPCI):
+        global raffle_started
+        if not raffle_started:
+            raffle_started = False
+        if ctx.author == raffle_author:
+            if raffle_started == True:
+                raffle_started = False
+                await ctx.defer()
+                close_comp = [ActionRow(
+                                Button(label='Add User',
+                                custom_id='test_user',
+                                style=ButtonStyle.green),
+                                Button(label='Information',
+                                custom_id='test_info',
+                                style=ButtonStyle.green),
+                                Button(label='Choose Winner',
+                                custom_id='raffle_win',
+                                style=ButtonStyle.green)
+                                )]
+                await _msg.edit(embed=raffle_embed, components=close_comp)
+                await ctx.respond('Test mode active.')
+            else:
+                await ctx.respond("No raffle found.", hidden=True)
+                return
+        else:
+            await ctx.respond("Only the raffle author can use this.", hidden=True)
+            return
+
+    @commands.Cog.on_click('test_user')
+    async def test_add_user(self, interaction, button):
+        if interaction.author != raffle_author:
+            await interaction.respond('Only the raffle author can use this', hidden=True)
+            return
+        close_comp = [ActionRow(
+                                Button(label='Add User',
+                                custom_id='test_user',
+                                style=ButtonStyle.green),
+                                # Button(label='Information',
+                                # custom_id='test_info',
+                                # style=ButtonStyle.green),
+                                Button(label='Choose Winner',
+                                custom_id='raffle_win',
+                                style=ButtonStyle.green)
+                                )]
+        
+        r = random.randint(1000, 9999)
+        name = f'TestUser#{r}'
+
+        submission = {random.choice(pots):random.randint(1,8), random.choice(weapons):random.randint(1,8), random.choice(armors):random.randint(1,8)}
+        
+        for key, values in list(submission.items()):
+            submission[f"{str(emojis[str(key)])}"] = submission.pop(str(key))
+
+        value = "\n".join([f"{k}x {v}" for k, v in submission.items()])
+
+        raffle_embed.add_field(name=name, value=value)
+        await _msg.edit(embed=raffle_embed, components=close_comp)
+        await interaction.respond('User added.', hidden=True)
+
+    @commands.Cog.on_click(r'^confirm(\D[0-9]+[\D]*)$')
+    async def confirm_submission_button_click(self, interaction, button):
+        submission_id = int(button.custom_id.split("@")[1])
+        submission_user = submission_messages[submission_id]['submission_user']
+        submission_value = submission_messages[submission_id]['submission_value']
+        submission_message = submission_messages[submission_id]['message']
+        raw_submission = submission_messages[submission_id]['raw_submit']
+
+        if "\n" in submission_value:
+            send_val = submission_value.replace('\n', ', ')
+        else:
+            send_val = submission_value
+
+        if interaction.author == raffle_author: 
+            embed_dict = raffle_embed.to_dict()
+            if submission_id in submission_messages:
+                if str(submission_user) in str(raffle_embed.fields):
+                    for field in embed_dict['fields']:
+                        if str(submission_user) == field['name']:
+                            submissions_count = 0
+                            submissions_count += len(field["value"].split("\n"))
+                            print(submissions_count)
+                            print(raw_submission)
+                            if len(raw_submission) + submissions_count > 8:
+                                submits_left = 8 - submissions_count
+                                await submission_message.edit(content=f'Too many submissions, {submission_user} has `{submits_left}` submissions left. ❌', components = [])
+                                del submission_messages[submission_id]
+                                return
+                            field["value"] += f'\n{submission_value}'
+                            break
+                    e = discord.Embed.from_dict(embed_dict)
+                    await _msg.edit(embed=e)
+                else:
+                    raffle_embed.add_field(name=f'{str(submission_user)}', value=submission_value)
+                    await _msg.edit(embed=raffle_embed)
+                    # update the message to indicate it was confirmed
+                await submission_message.edit(content=f'Confirmed ({send_val}) from {submission_user}.✅', components = [])
+                    # delete the message from the dictionary since it is no longer needed
+                del submission_messages[submission_id]
+
+    @commands.Cog.on_click(r'^decline(\D[0-9]+[\D]*)$')
+    async def decline_submission_button_click(self, interaction, button):
+        if interaction.author == raffle_author:
+            submission_id = int(button.custom_id.split("@")[1])
+            submission_user = submission_messages[submission_id]['submission_user']
+            submission_value = submission_messages[submission_id]['submission_value']
+
+            if '\n' in submission_value:
+                submission_value = submission_value.replace('\n', ', ')
+            if submission_id in submission_messages:
+                submission_message = submission_messages[submission_id]['message']
+                await submission_message.edit(content=f'Denied ({submission_value}) from {submission_user}.❌', components = [])
+                del submission_messages[submission_id]
+
+submission_messages = {}
 async def raffle_submission(self, interaction, submission, message = None):
+    global global_submission
+    B_ID = random.randint(1000, 9999)
+    if B_ID in submission_messages:
+        B_ID = random.randint(1000, 9999)
     confirm_comps = [ActionRow(
-                    Button(custom_id='con|confirm',
-                    style=ButtonStyle.green,
+                    Button(custom_id=f'confirm@{B_ID}',
+                    style=ButtonStyle.grey,
                     emoji= '✔️'),
-                    Button(custom_id='con|decline',
-                    style=ButtonStyle.red, 
+                    Button(custom_id=f'decline@{B_ID}',
+                    style=ButtonStyle.grey, 
                     emoji= '❌')
     )]
     ch = await self.bot.fetch_channel(1000872338973265940)
-    def confirm_check(i, b):
-        return i.author == raffle_author and i.channel == ch and 'con|' in b.custom_id
-    
 
     #1071134900310257766
     
     embed_dict = raffle_embed.to_dict()
 
-
     for key, values in list(submission.items()):
         submission[f"{str(emojis[str(key)])}"] = submission.pop(str(key))
-    value = "\n".join([f"{k}x {v}" for k, v in submission.items()])  
+    value = "\n".join([f"{k}x {v}" for k, v in submission.items()]) 
     if str(interaction.author) in str(raffle_embed.fields): ###if user already has a submission
-
         submissions_count = 0
         for field in embed_dict['fields']:
             if field["name"] == str(interaction.author):
                 submissions_count += len(field["value"].split("\n"))
+        
         # max_submissions = 8 - submissions_count
-
         # if len(submission) > max_submissions:
         #     te = value.split('\n')
         #     value = '\n'.join(te[:max_submissions])
+        #     print('oik here')
         #     print(value)
 
         if len(submission) + submissions_count > 8:
             submits_left = 8 - submissions_count
             await message.edit(content=f"There's a limit of 8 submissions, you have `{submits_left}` entries left.")
             return
-        for field in embed_dict["fields"]:
-            if field["name"] == str(interaction.author):
-                field["value"] += f'\n{value}'
-        e = discord.Embed.from_dict(embed_dict)
-        await _msg.edit(embed=e)
-        return
+
+        if interaction.author == raffle_author:
+            for field in embed_dict["fields"]:
+                if field["name"] == str(interaction.author):
+                    field["value"] += f'\n{value}'
+            e = discord.Embed.from_dict(embed_dict)
+            await _msg.edit(embed=e)
+            return
     
-    # if interaction.author != raffle_author:
-    #     dat_msg = await ch.send(f'New submission from {interaction.author}:\n{submission}', components=confirm_comps)
-    #     con_interaction, con_button = await self.bot.wait_for('button_click', check=confirm_check)
-    #     button_id = con_button.custom_id
-    #     await con_interaction.defer()
-    #     if 'confirm' in button_id:
-    #         await dat_msg.edit(content=f'~~New submission from {interaction.author}:~~\nCONFIRMED {submission}')
-    #     else:
-    #         await dat_msg.edit(content=f'~~New submission from {interaction.author}:~~\DENIED {submission}')
-    raffle_embed.add_field(name=f'{str(interaction.author)}', value=value)
-    await _msg.edit(embed=raffle_embed)
+    if interaction.author != raffle_author:
+        submission_message = await ch.send(f'New submission from {interaction.author}:\n{value}', components=confirm_comps)
+        submission_messages[B_ID] = {'message': submission_message, 'submission_value': value, 'submission_user': interaction.author, 'raw_submit': submission}
+    else:
+        raffle_embed.add_field(name=f'{str(interaction.author)}', value=value)
+        await _msg.edit(embed=raffle_embed)
     
 async def start_logs(self, message):    #date of log starting 9/2/22
     with open("root/Satori/logs.json", "r") as f:
