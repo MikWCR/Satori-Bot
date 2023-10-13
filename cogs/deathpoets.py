@@ -35,10 +35,10 @@ class DeathPoetsCog(commands.Cog):
             'Wis': '<:wis:1033436227896098856>',
             'Ubhp': '<:ubhp:1035524115198656553>',
             'Deca': '<:decaring:1035524113747411016>',
-            'Dominion': '<:t14armor:1035523462208430181>',
+            'Dominion': '<:dominion:1035523462208430181>',
             'Wyrmhide': '<:wyrmhide:1038478552733065317>',
             'Star-Mother': '<:starmother:1038478551520915557>',
-            'Vital-Unity': '<:t13staff:1035523460602007593>',
+            'Vital-Unity': '<:vitalunity:1035523460602007593>',
             'Sinister-Deeds': '<:sinisterdeeds:1038479245413982228>',
             'Mystical-Energy': '<:mysticalenergy:1038479243312640020>',
             'Evocation': '<:evocation:1038479330944237679>',
@@ -121,11 +121,11 @@ class DeathPoetsCog(commands.Cog):
         founder_role = discord.utils.get(dp_guild.roles, name="Founder")
         trial_role = discord.utils.get(dp_guild.roles, name="Trial staff")
         roles = [staff_role, leader_role, founder_role, trial_role]
-        staff_users = [i for i in dp_guild.members if any(y in i.roles for y in roles)]   
+        staff_users = [i for i in dp_guild.members if any(y in i.roles for y in roles)]
         for user in staff_users:
             if not str(user.id) in str(raffle_settings):
                 raffle_settings[user.id] = {}
-                raffle_settings[user.id]['Name'] = str(user)
+                raffle_settings[user.id]['Name'] = str(user.name)
                 raffle_settings[user.id]['Pot Only'] = False
                 raffle_settings[user.id]['Items Only'] = False
                 raffle_settings[user.id]['Disabled Pots'] = {}
@@ -134,7 +134,21 @@ class DeathPoetsCog(commands.Cog):
                     raffle_settings[user.id]['Disabled Pots'][pot] = False
                 for item in items:
                     raffle_settings[user.id]['Disabled Items'][item] = False
-        
+        # dP_role = discord.utils.get(dp_guild.roles, name="Death Poet")
+        # ambas_role = discord.utils.get(dp_guild.roles, name="Mortua Poetarum Ambassador")
+        # mortua_role = discord.utils.get(dp_guild.roles, name="Mortua Officer")
+        # officer = discord.utils.get(dp_guild.roles, name="Officer")
+        # member_role = discord.utils.get(dp_guild.roles, name="Member")
+
+        # ALL_roles = [dP_role, ambas_role, mortua_role, officer]
+        # ALL_users = [i for i in dp_guild.members if any(y in i.roles for y in ALL_roles)]
+        # for USERX in ALL_users:
+        #     if not member_role in USERX.roles:
+        #         await USERX.add_roles(member_role)
+        #         print(f'ADDED MEMBER TO {str(USERX)}')
+        #     else:
+        #         print('ALRADY HAS MEMBER ROLE. SKIPPING...')
+
         with open("root/Satori/raffle_settings.json", "w+") as fp:
                 json.dump(raffle_settings, fp, indent=4)
 
@@ -151,9 +165,11 @@ class DeathPoetsCog(commands.Cog):
             await start_logs(self, message)
         if message.channel.id == 412693781540765696:
             user = await self.bot.fetch_user(message.author.id)
-            role = discord.utils.get(message.guild.roles, name="applied")
-            Member = discord.utils.get(message.guild.roles, name='Member')
-            dp_role = discord.utils.get(message.guild.roles, name='Death Poet')
+            role = discord.utils.get(message.guild.roles, id=1005903260957282324)
+            Member = discord.utils.get(message.guild.roles, id=376110466885484549)
+            dp_role = discord.utils.get(message.guild.roles, id=1035644989549580369)
+            mp_role = discord.utils.get(message.guild.roles, id=1047368839681298533) #Adept Ethos ROLE
+            heated_poet_role = discord.utils.get(message.guild.roles, id=1140123330771423342)
             tzone = ['time zone', 'timezone', 'tz']
             ign = ['ingame name', 'in game name', 'ign']
             char = ['characters', 'character(s)', 'character']
@@ -161,43 +177,51 @@ class DeathPoetsCog(commands.Cog):
             if 'fame' in strx and any(y in strx for y in tzone) and any(z in strx for z in ign) and any(w in strx for w in char):
                 await user.send("Your application has been submitted. Allow up to 24 hours for a response. If there's an issue, please contact a staff member immediately.")
                 await message.author.add_roles(role)
-                chan = await self.bot.fetch_channel(374720030387994625) 
-                components = [ActionRow(Button(label='Accept',
-                                    custom_id='yes_button',
-                                    style=ButtonStyle.green
-                                    ),
-                                Button(label='Decline',
-                                    custom_id='no_button',
-                                    style=ButtonStyle.red))
-                    ]
-                msg = await chan.send(f"<@&374717311422300182>, a new application from: {str(user)} ({user.id})\n ```{message.content}```", components = components)
+                chan = await self.bot.fetch_channel(910289614881828924) 
+                components = [ActionRow(Button(label='Death Poets',custom_id='yes_button',style=ButtonStyle.green),
+                                Button(label='Adept Ethos',custom_id='mort_button',style=ButtonStyle.green),
+                                Button(label='Heated Post', custom_id='hp_button', style=ButtonStyle.green),
+                                Button(label='Decline', custom_id='no_button',style=ButtonStyle.red))]
+                app_msg_content = f"<@&1140088001242861719>, a new application from: {str(user.name)} ({user.id})\n ```{message.content}```"
+                msg = await chan.send(f"{app_msg_content}", components = components)
                 def _check(i: discord.ComponentInteraction, b):
                     return i.message == msg
-                admin = discord.utils.get(message.guild.roles, name="Staff")
-                leader = discord.utils.get(message.guild.roles, name="Leader")
-                Founder = discord.utils.get(message.guild.roles, name="Founder")
-                staff_candidate = discord.utils.get(message.guild.roles, name="Trial staff")
+                # admin = discord.utils.get(message.guild.roles, name="Staff")
+                # leader = discord.utils.get(message.guild.roles, name="Leader")
+                # Founder = discord.utils.get(message.guild.roles, name="Founder")
+                # staff_candidate = discord.utils.get(message.guild.roles, name="Trial staff")
+                ambassador_role = discord.utils.get(message.guild.roles, id=1047581862182273134) #Adept Ethos Ambassador
+                mortua_officer_role = discord.utils.get(message.guild.roles, id=1029833888677253153) #Adept Ethos Officer
+                leader_role = discord.utils.get(message.guild.roles, id=856194389873655820)
+                founder_role = discord.utils.get(message.guild.roles, id=374716998430752769)
+                officer_role = discord.utils.get(message.guild.roles, id=374717311422300182) #Death Poet Officer
+                heated_poet_officer = discord.utils.get(message.guild.roles, id=1140122327896559656)
+                heated_poet_ambassador_role = discord.utils.get(message.guild.roles, id=1140121539367411732)
+                deez_roles = [ambassador_role, mortua_officer_role, leader_role, founder_role, officer_role, heated_poet_officer, heated_poet_ambassador_role]
                 try:
                     while True:
                         interaction, button = await self.bot.wait_for('button_click', check=_check)
                         button_id = button.custom_id
                         await interaction.defer()
-                        if staff_candidate or admin or Founder or leader in interaction.author.roles or interaction.author.id == 911306468106571816:
+                        if heated_poet_officer or heated_poet_ambassador_role or ambassador_role or leader_role or founder_role or officer_role or mortua_officer_role in interaction.author.roles or interaction.author.id == 911306468106571816:
                             if button_id == "yes_button":
+                                #await app_accept(self, logs=logs, message=message, interaction=interaction)
                                 try:
                                     logs[str(message.guild.id)]['Users'][str(interaction.author.id)]['Accepted'] += 1
                                 except Exception as e:
                                     gene = await self.bot.fetch_channel(972473224845729805)
+                                    
                                     await gene.send(f"ACCEEPTED ERROR {e}")
                                     continue
                             #await interaction.edit(embed=embed, components= [])
                                 updated_guild = self.bot.get_guild(374716378655227914)
                                 if not user in updated_guild.members:
-                                    await interaction.respond("User has left the server.")
+                                    #await interaction.respond("User has left the server.")
+                                    await interaction.edit(content=f"{app_msg_content}\n User has left the server.", components = [])
                                     return
                                 if role in message.author.roles:
-                                    await user.send("You're application was approved. You should now have access to text and voice channels.")
-                                    await interaction.edit(content=f"<@&374717311422300182>, a new application from: {str(user)} ({user.id})\n ```{message.content}```\n ✅ Approved ✅ by {str(interaction.author)}", components = [])
+                                    await user.send("You're application was approved to join Death Poets. You should now have access to text and voice channels.")
+                                    await interaction.edit(content=f"{app_msg_content}\n ✅ Approved to Death Poets ✅ by {str(interaction.author.name)}", components = [])
                                     await interaction.respond("User has been notified that they're application has been approved.", hidden=True, delete_after=5)
                                     try:
                                         await message.author.remove_roles(role)
@@ -209,6 +233,69 @@ class DeathPoetsCog(commands.Cog):
                                         logs[str(message.guild.id)]['Accepted Applications'] += 1
                                     finally:
                                         await message.author.add_roles(dp_role)
+                                        await message.author.add_roles(Member)
+                                        with open("root/Satori/logs.json", "w+") as fp:
+                                            json.dump(logs, fp, indent=4)
+                                    return
+                            elif button_id == 'mort_button':
+                                try:
+                                    logs[str(message.guild.id)]['Users'][str(interaction.author.id)]['Accepted'] += 1
+                                except Exception as e:
+                                    gene = await self.bot.fetch_channel(972473224845729805)
+                                    
+                                    await gene.send(f"(Ethos) ACCEEPTED ERROR {e} mod author not found.")
+                                    continue
+                                updated_guild = self.bot.get_guild(374716378655227914)
+                                if not user in updated_guild.members:
+                                    #await interaction.respond("User has left the server.")
+                                    await interaction.edit(content=f"{app_msg_content}\n User has left the server.", components = [])
+                                    return
+                                if role in message.author.roles:
+                                    await user.send("You're application was approved to join our sister guild Adept Ethos. You should now have access to text and voice channels.")
+                                    await interaction.edit(content=f"{app_msg_content}\n ✅ Approved to Adept Ethos ✅ by {str(interaction.author.name)}", components = [])
+                                    await interaction.respond("User has been notified that they're application has been approved.", hidden=True, delete_after=5)
+                                    try:
+                                        await message.author.remove_roles(role)
+                                    except Exception as e:
+                                        print(e)
+                                        await interaction.respond("Error applying role. This is either because User is no longer in the server, or is due to user not having the 'applied' role when you clicked Accept. The member role should still be automatically applied.", hidden=True)
+                                        logs[str(message.guild.id)]['Error Applying Role'] += 1
+                                    else:
+                                        logs[str(message.guild.id)]['Accepted Applications'] += 1
+                                    finally:
+                                        await message.author.add_roles(mp_role)
+                                        await message.author.add_roles(Member)
+                                        with open("root/Satori/logs.json", "w+") as fp:
+                                            json.dump(logs, fp, indent=4)
+                                    return
+                            elif button_id == 'hp_button': #Pressed Heated Poet
+                                try:
+                                    logs[str(message.guild.id)]['Users'][str(interaction.author.id)]['Accepted'] += 1
+                                except Exception as e:
+                                    gene = await self.bot.fetch_channel(972473224845729805)
+                                    
+                                    await gene.send(f"(Ethos) ACCEEPTED ERROR {e} mod author not found.")
+                                    continue
+                                updated_guild = self.bot.get_guild(374716378655227914)
+                                if not user in updated_guild.members:
+                                    #await interaction.respond("User has left the server.")
+                                    await interaction.edit(content=f"{app_msg_content}\n User has left the server.", components = [])
+                                    return
+                                if role in message.author.roles:
+                                    await user.send("You're application was approved to join our new sister guild Heated Post. You should now have access to text and voice channels.")
+                                    await interaction.edit(content=f"{app_msg_content}\n ✅ Approved to Heated Post ✅ by {str(interaction.author.name)}", components = [])
+                                    await interaction.respond("User has been notified that they're application has been approved.", hidden=True, delete_after=5)
+                                    try:
+                                        await message.author.remove_roles(role)
+                                    except Exception as e:
+                                        print(e)
+                                        await interaction.respond("Error applying role. This is either because User is no longer in the server, or is due to user not having the 'applied' role when you clicked Accept. The member role should still be automatically applied.", hidden=True)
+                                        logs[str(message.guild.id)]['Error Applying Role'] += 1
+                                    else:
+                                        logs[str(message.guild.id)]['Accepted Applications'] += 1
+                                    finally:
+                                        await message.author.add_roles(heated_poet_role)
+                                        await message.author.add_roles(Member)
                                         with open("root/Satori/logs.json", "w+") as fp:
                                             json.dump(logs, fp, indent=4)
                                     return
@@ -232,9 +319,10 @@ class DeathPoetsCog(commands.Cog):
                                     ]
                                 updated_guild = self.bot.get_guild(374716378655227914)
                                 if not user in updated_guild.members:
-                                    await interaction.respond("User has left the server.")
+                                    await interaction.edit(content=f"<@&1140088001242861719>, a new application from: {str(user.name)} ({user.id})\n ```{message.content}```\n User has left the server.", components = [])
+                                    
                                     return
-                                await interaction.edit(content=f"<@&374717311422300182>, a new application from: {user.name}#{user.discriminator} ({user.id})\n ```{message.content}```\n🚫 Denied 🚫 by {interaction.author.name}#{interaction.author.discriminator}", components = [])
+                                await interaction.edit(content=f"<@&1140088001242861719>, a new application from: {user.name} ({user.id})\n ```{message.content}```\n🚫 Denied 🚫 by {interaction.author.name}", components = [])
                                 dong = await interaction.respond("Reason?", hidden=True, components = application_buttons, delete_after=120)
                                 logs[str(message.guild.id)]['Declined Applications'] += 1
                                 with open("root/Satori/logs.json", "w+") as fp:
@@ -249,7 +337,7 @@ class DeathPoetsCog(commands.Cog):
                                     await dong.edit(content='Interaction timed out. User has been notified. ',components = [],delete_after=8)
                                 if b.custom_id == "reqs":
                                     await interaction.edit(
-                                        content=f"<@&374717311422300182>, a new application from: {user.name}#{user.discriminator} ({user.id})\n ```{message.content}```\n🚫 Denied 🚫 by {interaction.author.name}#{interaction.author.discriminator} for `Not meeting requirements.`", components = [])
+                                        content=f"<@&1140088001242861719>, a new application from: {user.name} ({user.id})\n ```{message.content}```\n🚫 Denied 🚫 by {interaction.author.name} for `Not meeting requirements.`", components = [])
                                     await user.send("Your application was denied for: `Under requirements.`.")
                                     await dong.edit(content='User has been notified.',components = [], delete_after=8)
                                 elif b.custom_id == "custom":
@@ -264,12 +352,12 @@ class DeathPoetsCog(commands.Cog):
                                     else:
                                         await user.send(f"Your application was denied for the following reason:\n```{reason.content}``` ")
                                         await interaction.edit(
-                                            content=f"<@&374717311422300182>, a new application from: {user.name}#{user.discriminator} ({user.id})\n ```{message.content}```\n🚫 Denied 🚫 by {interaction.author.name}#{interaction.author.discriminator} for `{reason.content}`", components = [])
+                                            content=f"<@&1140088001242861719>, a new application from: {user.name} ({user.id})\n ```{message.content}```\n🚫 Denied 🚫 by {interaction.author.name} for `{reason.content}`", components = [])
                                         await reason.delete()
                                         await dong.edit(content=f'User has been notified for `{reason.content}`',components = [], delete_after=8)
                                 elif b.custom_id == "none":
                                     await interaction.edit(
-                                        content=f"<@&374717311422300182>, a new application from: {user.name}#{user.discriminator} ({user.id})\n ```{message.content}```\n🚫 Denied 🚫 by {interaction.author.name}#{interaction.author.discriminator} with no given reason", components = [])
+                                        content=f"<@&1140088001242861719>, a new application from: {user.name} ({user.id})\n ```{message.content}```\n🚫 Denied 🚫 by {interaction.author.name} with no given reason", components = [])
                                     await user.send('Your application was declined.')
                                     await dong.edit(content='User has been notified.',components = [], delete_after=8)
                                 await user.send('Although you have not been accepted, you have been granted the member role so you can still play with us.')
@@ -278,7 +366,7 @@ class DeathPoetsCog(commands.Cog):
                         else:
                             await interaction.respond("You do not have permission to press this button.", hidden=True, delete_after=5)
                 except asyncio.TimeoutError:
-                    await chan.send("Error due to Timeout. This shouldn't be an issue if it does please DM Mik#1111")
+                    await chan.send("Error due to Timeout. This shouldn't be an issue if it does please DM mik_ilo")
                     return
             else:
                 await user.send(f"Your application was deleted due to invalid application format. Here's the application you sent.\n ```{message.content}```")
@@ -293,6 +381,9 @@ class DeathPoetsCog(commands.Cog):
                 except Exception as e:
                     gene = await self.bot.fetch_channel(972473224845729805)
                     await gene.send(f"Error removing role called 'applied': {e}")
+
+
+
     @tasks.loop(hours=1)
     async def realmblog_loop(self):
         blog = BlogApi()
@@ -388,11 +479,64 @@ class DeathPoetsCog(commands.Cog):
                 accepted = logs[str(ctx.guild.id)]['Users'][str(id)]['Accepted']
                 declned = logs[str(ctx.guild.id)]['Users'][str(id)]['Declined']
                 user = await self.bot.fetch_user(id)
-                embed.add_field(name=str(user), value=f'Accepted: `{accepted}`|Declined: `{declned}`', inline=True)
+                embed.add_field(name=str(user.name), value=f'Accepted: `{accepted}`|Declined: `{declned}`', inline=True)
         acp = logs[str(ctx.guild.id)]['Accepted Applications']
         dec = logs[str(ctx.guild.id)]['Declined Applications']
         embed.set_footer(text=f'Total amount of applications submitted since 9/2/22: {acp + dec}')
         await ctx.respond(embed=embed)
+
+
+
+#Raid Module
+    '''This Module will be similiar to what's in raiding discords.
+    On command raid-vc, we'll open a voice channel with certain permissions that only the RL and the staff can talk.
+    On command raid, we'll start a raid without VC. This will just ping everyone.'''
+    @commands.Cog.slash_command(
+            base_name='raid',
+            base_desc='Start a new raid',
+            name='start',
+            description='Starts a raid and creates a new Voice Channel.',
+            guild_ids=[374716378655227914, 972473224845729802],
+            default_required_permissions=Permissions(manage_channels=True))
+    async def raid_vc_start(self, ctx: APPCI):
+        global _category, _raid_msg, raid_author
+        raid_author = ctx.author
+        raid_comp = ActionRow(Button(
+                                    label='Lock',
+                                    custom_id='raid_lock',
+                                    style=ButtonStyle.grey,
+                                    disabled=True),
+                              Button(
+                                    label='Close',
+                                    custom_id='raid_close',
+                                    style=ButtonStyle.red)
+                                    )
+        _DP = self.bot.get_guild(374716378655227914) #374716378655227914 #Get Deathpoets guild.
+        caty = 785644432534798388 #785644432534798388 DP
+        _category = discord.utils.get(_DP.categories, id=caty)
+        for vc in _category.voice_channels:
+            if ctx.author.display_name in vc.name:
+                await ctx.respond('There\'s already been a raid started by you, if this is not the case delete the VC with your display name.')
+                return
+        _vchannel = await _DP.create_voice_channel(name=f"{ctx.author.display_name}'s Raid", category=_category, user_limit=40, reason='Raid')
+        _raid_msg = await ctx.respond(f'Voice channel `{_vchannel.name}` created in {_category.name} ({caty}).', components=raid_comp)
+
+    @commands.Cog.on_click('raid_close')
+    async def raid_vc_close(self, interaction: ComponentInteraction, button):
+        if interaction.author != raid_author:
+            return
+        found_vc = False
+        for vc in _category.voice_channels:
+            if interaction.author.display_name in vc.name:
+                await vc.delete(reason='Raid has finished')
+                await _raid_msg.edit(content="Raid completed. Voice channel deleted.", components=[])
+                found_vc=True
+                break
+        if not found_vc:
+            await _raid_msg.edit(content='No voice channel found, if this is wrong let Mik-e#1111 know and delete the channel manually.', components=[])
+
+####TICKET SYSTEM####
+
 
 #####RAFFLE MODULE#####
 
@@ -404,9 +548,10 @@ class DeathPoetsCog(commands.Cog):
         guild_ids=[374716378655227914, 972473224845729802],
         default_required_permissions=Permissions(manage_messages=True))
     async def raffle_msg(self, ctx: APPCI):
+        global yn_comps, raffle_start_components, quan_components
         logging.basicConfig(filename='root/Satori/logs/raffle_logs.log', level=logging.INFO, 
                     format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-        components = [ActionRow(
+        raffle_start_components = [ActionRow(
             Button(label='Submit',
             custom_id='raffle_submit',
             style=ButtonStyle.green),
@@ -415,9 +560,8 @@ class DeathPoetsCog(commands.Cog):
             style=ButtonStyle.gray),
             Button(label='Delete',
             custom_id='raffle_del',
-            style=ButtonStyle.red))
+            style=ButtonStyle.red)), ActionRow()
         ]
-        global yn_comps
         yn_comps=[ActionRow(
                     Button(
                         label='Yes',
@@ -428,7 +572,21 @@ class DeathPoetsCog(commands.Cog):
                         custom_id='no',
                         style=ButtonStyle.red))
                         ]
-        global quan_components
+        def ping_selection(i: discord.ComponentInteraction, b):
+            return i.author == ctx.author and i.channel == ctx.channel
+        do_ping = False
+        ping_msg = await ctx.respond("Do you want to ping everyone?", components=yn_comps, hidden=True)
+        try:
+            ping_interaction, ping_button = await self.bot.wait_for('button_click', check=ping_selection, timeout=15)
+        except asyncio.TimeoutError:
+            await ping_msg.edit(content='Continuing without ping...', components=[])
+            return
+        await ping_interaction.defer()
+        if ping_button.custom_id == 'no':
+            await ping_msg.edit(content='Continuing without ping...', components=[])
+        else:
+            await ping_msg.edit(content='Pinging everyone.', components=[])
+            do_ping = True
         quan_components=[ActionRow(), ActionRow()]
         nums = {
             1 : '1️⃣',
@@ -451,21 +609,21 @@ class DeathPoetsCog(commands.Cog):
                 quan_components[0].add_component(but)
             else:
                 quan_components[1].add_component(but)
-        global raffle_embed, raffle_author, _msg
+        global raffle_embed, raffle_author, _msg, raffle_started
+        if do_ping:
+            allowed_mentions = discord.AllowedMentions(everyone = True)
+            await ctx.respond("@everyone A new raffle has started.", allowed_mentions = allowed_mentions)
         raffle_embed = discord.Embed(
             title=f"Press the button below to submit items into the raffle for a chance to win.", 
-            description=f"**How it works**:\n After pressing the button, you'll be asked to select what type of item you want to submit. Afterwards, you'll be asked to enter the quantity of the items. Just type the message into the channel the amount. Once this is done, the staff member who started the raffle will get a notification. They will contact you to trade over the items to them in game. Winners are decided based on probability and how many submissions were entered.",
+            description=f"**How it works**:\n After pressing the button, you'll be asked to select what type of item you want to submit. Then the message will be updated with buttons to enter the quantity of the item.  Once this is done, the staff member who started the raffle will get a notification. They will contact you to trade over the items to them in game. Winners are decided based on probability and how many submissions were entered.",
             color=random.randint(0, 0xffffff))
         raffle_embed.set_author(name=f'New Raffle started by {str(ctx.author)}.')
         raffle_author = ctx.author
-        _msg = await ctx.respond(embed=raffle_embed, components=components)
+        _msg = await ctx.respond(embed=raffle_embed, components=raffle_start_components)
         
-        global raffle_started
-        raffle_started = True
-            
+        raffle_started = True           
 
     @commands.Cog.on_click('raffle_submit')
-    #person clicks buytton, staff gets notification to confirm if items have been traded
     async def raffle_submit(self, interaction: ComponentInteraction, button):
         global submit_interaction
         submit_interaction = interaction
@@ -474,33 +632,22 @@ class DeathPoetsCog(commands.Cog):
         item_settings = settings[str(raffle_author.id)]['Disabled Items']
         p_settings = settings[str(raffle_author.id)]['Disabled Pots']
 
-        original_options = []
-        
-        for p in pots:
-            if not p_settings[p]:
-                original_options.append(SelectOption(emoji=emojis['Life'], label='Potions', value='Potions', description='Another menu will let you select which types of pot.'))
-                break
-        
-        for wep in weapons:
-            if not item_settings[wep]:
-                original_options.append(SelectOption(emoji=emojis['Vital-Unity'], label='T13 Weapons', value='T13Weapon', description='Ranging from ~4GL to 1 Deca'))
-                break
-        
-        for arm in armors:
-            if not item_settings[arm]:
-                original_options.append(SelectOption(emoji=emojis['Dominion'], label='T14 Armors', value='T14Armor', description='Worth ~3GL'))
-                break
+    
+        original_options = [SelectOption(emoji=emojis['Life'], label='Potions', value='Potions', description='Another menu will let you select which types of pot.')] if any(not p_settings[p] for p in pots) else []
+
+        original_options += [SelectOption(emoji=emojis['Vital-Unity'], label='T13 Weapons', value='T13Weapon', description='Ranging from ~4GL to 1 Deca')] if any(not item_settings[wep] for wep in weapons) else []
+
+        original_options += [SelectOption(emoji=emojis['Dominion'], label='T14 Armors', value='T14Armor', description='Worth ~3GL')] if any(not item_settings[arm] for arm in armors) else []
 
         if not item_settings['Deca']:
             original_options.append(SelectOption(emoji=emojis['Deca'], label='Ring of Decade', value='Deca', description='Deca rings worth ~16GL'))
-        
+
         if not item_settings['Ubhp']:
             original_options.append(SelectOption(emoji=emojis['Ubhp'], label='Unbound HP', value='Ubhp', description='Ring of Unbound Health'))
-        components = [[SelectMenu(custom_id='_select_', options=original_options,
-            placeholder='Select an option', max_values=1)
-        ]]
 
-        if settings[str(raffle_author.id)]['Pot Only'] == True and settings[str(raffle_author.id)]['Items Only'] == False:
+        components = [[SelectMenu(custom_id='_select_', options=original_options, placeholder='Select an option', max_values=1)]]
+
+        if settings[str(raffle_author.id)]['Pot Only'] and not settings[str(raffle_author.id)]['Items Only']:
             components = [[SelectMenu(custom_id='_select_', options=[
             SelectOption(emoji=emojis['Life'], label='Potions', value='Potions',
                         description='Another menu will let you select which types of pot.')
@@ -676,7 +823,6 @@ class DeathPoetsCog(commands.Cog):
             global weapon_msg
             weapon_msg = await msg_with_selects.edit(content='Select which type of weapons you want to submit:', components=weapon_components)
 
-
     @commands.Cog.on_select(custom_id='weapon_select')
     async def on_weapon_sel(self, interaction, select_menu):
         submission = {}
@@ -735,8 +881,8 @@ class DeathPoetsCog(commands.Cog):
                     name_submissions = proxy.name
                     if not name_submissions == interaction.author:
                         usernames.append(name_submissions)   
-                # if str(interaction.author) in usernames:
-                #     usernames.remove(str(interaction.author))
+                if str(interaction.author) in usernames:
+                    usernames.remove(str(interaction.author))
                 for x in usernames:
                     button = Button(label=f'{x}', custom_id=f'name#{x}', style=ButtonStyle.blurple)
                     name_comps[0].add_component(button)
@@ -865,7 +1011,6 @@ class DeathPoetsCog(commands.Cog):
             embed_old_value = None
             for field in embed_dict['fields']:
                 if field['name'] == str(interaction.author) and entry in field['value']:
-#                    if entry in field['value']:
                     embed_old_value = str(field['value']).split('\n')
                     if entry in embed_old_value:
                         embed_old_value.remove(str(entry))
@@ -903,23 +1048,19 @@ class DeathPoetsCog(commands.Cog):
             player_submissions_list = player_submissions.split('\n')
             for s in player_submissions_list:
                 s = s[2:]
-                submits.append(int(s))
+                try:
+                    submits.append(int(s))
+                    logging.info('Appending submits TRY')
+                except:
+                    submits.append(int(float(str(s))))
+                    logging.info('Appending submits EXCEPT')
                 total_submissions += int(s)
                 player_submits += int(s)
             users[field['name']] = {}
             users[field['name']]['value'] = field['value']
             users[field['name']]['player_submissions'] = player_submits
             if any(p in str(val) for p in pots): 
-                pot_list = []
-                if "\n" in val:
-                    val_list = val.split('\n')
-                else:
-                    val_list = [val]
-                for i in val_list:
-                    if any(p in i for p in pots):
-                        get_pot_amnt = re.sub('.+?(?=x)', '', i)
-                        pot_amnt = get_pot_amnt[2:]
-                        pot_list.append(int(pot_amnt))                  
+                pot_list = [int(re.sub('.+?(?=x)', '', i)[2:]) for i in (val.split('\n') if '\n' in val else [val]) if any(p in i for p in pots)]               
                 users[field['name']['total_pots']] = sum(pot_list)
         logging.info(f'Total_submissions = {total_submissions}')
 
@@ -946,10 +1087,12 @@ class DeathPoetsCog(commands.Cog):
             winner = random.choice(players)
             logging.info(f'Winner chosen via random choosing: {winner}')
 
-        guild_mems = interaction.guild.members
-        for user in guild_mems:
-            if winner == str(user):
-                user_id = user.id
+        # guild_mems = interaction.guild.members
+        # for user in guild_mems:
+        #     if winner == str(user):
+        #         user_id = user.id
+        user_id = next((user.id for user in interaction.guild.members if winner == str(user.name)), None)
+
         try:
             await interaction.respond(f'Congratulations <@{user_id}>, you have won the raffle! Contact {raffle_author} to claim your items.')
         except:
@@ -1004,20 +1147,20 @@ class DeathPoetsCog(commands.Cog):
         itm_only = settings[str(ctx.author.id)]['Items Only']
         
         setting_comps = [ActionRow(
-                            Button(label='Disable Specific Pots',
-                            custom_id='setting disable_pots',
-                            style=ButtonStyle.grey),
-                            Button(label='Disable Specific Items',
-                            custom_id='setting disable_items',
-                            style=ButtonStyle.grey)),
-                        ActionRow(
                             Button(label='Pots Only',
                             custom_id='setting pot',
                             style=ButtonStyle.red if not pt_only else ButtonStyle.green),
                             Button(label='Items Only',
                             custom_id='setting item',
-                            style=ButtonStyle.red if not itm_only else ButtonStyle.green)
-                        )]
+                            style=ButtonStyle.red if not itm_only else ButtonStyle.green)),
+                        ActionRow(
+                            Button(label='Disable Specific Pots',
+                            custom_id='setting disable_pots',
+                            style=ButtonStyle.grey),
+                            Button(label='Disable Specific Items',
+                            custom_id='setting disable_items',
+                            style=ButtonStyle.grey))
+                        ]
         raffle_settings_embed = discord.Embed(title='Raffle Options', description='')
         raffle_settings_embed.set_author(name=f'{str(ctx.author)}', icon_url=ctx.author.avatar_url)
         raffle_settings_embed.add_field(name='Pots Only', value=f'{str(bool(settings[str(ctx.author.id)]["Pot Only"]))}', inline=False)
@@ -1047,10 +1190,10 @@ class DeathPoetsCog(commands.Cog):
 
         if pot_only:
             pot_only = False
-            setting_comps[1][0].style = ButtonStyle.red
+            setting_comps[0][0].style = ButtonStyle.red
         else:
-            setting_comps[1][0].style = ButtonStyle.green
-            setting_comps[1][1].style = ButtonStyle.red
+            setting_comps[0][0].style = ButtonStyle.green
+            setting_comps[0][1].style = ButtonStyle.red
             item_only = False
             pot_only = True
 
@@ -1079,11 +1222,11 @@ class DeathPoetsCog(commands.Cog):
         pot_only = settings[str(interaction.author.id)]['Pot Only']
 
         if item_only:
-            setting_comps[1][1].style = ButtonStyle.red
+            setting_comps[0][1].style = ButtonStyle.red
             item_only = False
         else:
-            setting_comps[1][1].style = ButtonStyle.green
-            setting_comps[1][0].style = ButtonStyle.red
+            setting_comps[0][1].style = ButtonStyle.green
+            setting_comps[0][0].style = ButtonStyle.red
             pot_only = False
             item_only = True
 
@@ -1100,117 +1243,148 @@ class DeathPoetsCog(commands.Cog):
         with open("root/Satori/raffle_settings.json", "w+") as fp:
             json.dump(settings, fp, indent=4)
 
-
     @commands.Cog.on_click('setting disable_pots')
-    async def settings_disable_pots(self, interaction, button):        
+    async def settings_disable_pots(self, interaction, button):   
+        def update_pot_buttons(components, pot_val):
+            for i, pot in enumerate(pots):
+                f = emojis[pot]
+                but = Button(
+                    emoji=f,
+                    custom_id=f'pot|{pot}{random.randint(1000, 9999)}',
+                    style=ButtonStyle.red if pot_val[pot] else ButtonStyle.green)
+                if i < 4:
+                    components[0].add_component(but)
+                else:
+                    components[1].add_component(but)
+            return components    
         with open("root/Satori/raffle_settings.json", "r") as f:
             settings = json.load(f)
         pot_components = [ActionRow(), ActionRow()]
         pot_val = settings[str(interaction.author.id)]['Disabled Pots']
-        for i, pot in enumerate(pots):
-            f = emojis[pot]
-            but = Button(
-                emoji=f,
-                custom_id=f'pot|{pot}',
-                style=ButtonStyle.red if pot_val[pot] else ButtonStyle.green)
-            if i < 4:
-                pot_components[0].add_component(but)
-            else:
-                pot_components[1].add_component(but)
-        component_msg = await interaction.respond('Which pot do you want to disable? (red = Disabled)', components=pot_components, hidden=True)
+        pot_only = settings[str(interaction.author.id)]['Pot Only']
+        up_pot_components = update_pot_buttons(pot_components, pot_val)
+            
+        component_msg = await interaction.respond('Which pot do you want to disable? (red = Disabled)', components=up_pot_components, hidden=True)
         def check(i,b):
             return i.author == interaction.author and i.channel == interaction.channel and 'pot|' in b.custom_id
-        try:
-            pot_select_interaction, pot_button = await self.bot.wait_for('button_click', check=check, timeout=15)
-        except asyncio.TimeoutError:
-            await component_msg.edit(content='Cancelled due to timeout.', components=[])
-            await setting_msg.edit(components=setting_comps)
-            return
-        await pot_select_interaction.defer()
-        type_of_pot = pot_button.custom_id[4:]
-        pot_emoji = pot_button.emoji
-        pot_status = settings[str(interaction.author.id)]['Disabled Pots'][type_of_pot]
-        pot_status = not pot_status
-        settings[str(interaction.author.id)]['Disabled Pots'][type_of_pot] = pot_status
-        with open("root/Satori/raffle_settings.json", "w+") as fp:
-            json.dump(settings, fp, indent=4)
-        content = None
-        if pot_status == False:
-            content = f'You have enabled {pot_emoji}'
-        else:
-            content = f'You have disabled {pot_emoji}. Pot can no longer be submitted.'
-        setting_embed_dict = raffle_settings_embed.to_dict()
-        
-        
-        for field in setting_embed_dict['fields']:
-            if field['name'] == 'Disabled Pots':
-                value = field['value']
-                value = value.split(" ") if value != '[]' else []
-                if str(pot_emoji) in value:
-                    value.remove(str(pot_emoji))
-                else:
-                    value.append(str(pot_emoji))
-                field['value'] = ' '.join(value) if value else '[]'
+        while True:
+            try:
+                pot_select_interaction, pot_button = await self.bot.wait_for('button_click', check=check, timeout=15)
+            except asyncio.TimeoutError:
+                await component_msg.edit(content='Cancelled due to timeout.', components=[])
+                await setting_msg.edit(components=setting_comps)
+                return
+            await pot_select_interaction.defer()
+            if pot_only and pot_button.style == ButtonStyle.green:
+                count = sum(1 for pot in pot_val.values() if pot)
+                if count >= 7:
+                    await component_msg.edit(content='At least one pot must be enabled if `Pot Only` is True. You have already disabled 7 pots. Cannot disable more.', components=[])
+                    continue
 
-        
-        e = discord.Embed.from_dict(setting_embed_dict)
-        await component_msg.edit(content=content, components=[])
-        await setting_msg.edit(embed=e, components=setting_comps)
-    
+            type_of_pot = pot_button.custom_id[4:-4]
+            pot_emoji = pot_button.emoji
+            pot_status = settings[str(interaction.author.id)]['Disabled Pots'][type_of_pot]
+            pot_status = not pot_status
+            settings[str(interaction.author.id)]['Disabled Pots'][type_of_pot] = pot_status
+            with open("root/Satori/raffle_settings.json", "w+") as fp:
+                json.dump(settings, fp, indent=4)
+            content = None
+            if not pot_status:
+                content = f'You have enabled {pot_emoji}'
+                pot_button.style = ButtonStyle.green
+            else:
+                content = f'You have disabled {pot_emoji}. Pot can no longer be submitted.'
+                pot_button.style = ButtonStyle.red
+            setting_embed_dict = raffle_settings_embed.to_dict()
+            
+            await asyncio.sleep(1)
+            for field in setting_embed_dict['fields']:
+                if field['name'] == 'Disabled Pots':
+                    value = field['value']
+                    value = value.split(" ") if value != '[]' else []
+                    if str(pot_emoji) in value:
+                        value.remove(str(pot_emoji))
+                    else:
+                        value.append(str(pot_emoji))
+                    field['value'] = ' '.join(value) if value else '[]'
+
+                    
+            e = discord.Embed.from_dict(setting_embed_dict)
+            new_comps = [ActionRow(), ActionRow()]
+            fa = update_pot_buttons(new_comps, settings[str(interaction.author.id)]['Disabled Pots'])
+            await component_msg.edit(content=content, components=fa)
+            await setting_msg.edit(embed=e, components=setting_comps)    
+
     @commands.Cog.on_click('setting disable_items')
     async def settings_disable_items(self, interaction, button):
+        def update_item_buttons(components, item_val):
+            for i, item in enumerate(_items):
+                f = emojis[item]
+                b = Button(emoji=f,
+                    custom_id=f'item|{item}',
+                    style=ButtonStyle.red if item_val[item] else ButtonStyle.green)
+                if i < 4:
+                    components[0].add_component(b)
+                elif i < 8:
+                    components[1].add_component(b)
+                else:
+                    components[2].add_component(b)
+            return components    
         with open("root/Satori/raffle_settings.json", "r") as f:
             settings = json.load(f)
         item_comps = [ActionRow(), ActionRow(), ActionRow()]
         _items = items.copy()
         item_val = settings[str(interaction.author.id)]['Disabled Items']
-        for i, item in enumerate(_items):
-            f = emojis[item]
-            b = Button(emoji=f,
-                custom_id=f'item|{item}',
-                style=ButtonStyle.red if item_val[item] else ButtonStyle.green)
-            if i < 4:
-                item_comps[0].add_component(b)
-            elif i < 8:
-                item_comps[1].add_component(b)
-            else:
-                item_comps[2].add_component(b)
-        component_msg = await interaction.respond('Which item do you want to disable? (red = Disabled)', components=item_comps, hidden=True)
+        items_only = settings[str(interaction.author.id)]['Items Only']
+        start_item_components = update_item_buttons(item_comps, item_val)
+        component_msg = await interaction.respond('Which item do you want to disable? (red = Disabled)', components=start_item_components, hidden=True)
         def disable_item_check(i:discord.ComponentInteraction,b):
             return i.author == interaction.author and i.channel == interaction.channel and 'item|' in b.custom_id
-        try: 
-            item_select_interaction, item_button = await self.bot.wait_for('button_click', check=disable_item_check, timeout=10)
-        except asyncio.TimeoutError:
-            await component_msg.edit(content='Cancelled due to timeout.', components=[])
-            await setting_msg.edit(components=setting_comps)
-        await item_select_interaction.defer()
-        item_type = item_button.custom_id[5:]
-        item_emoji = item_button.emoji
-        item_status = settings[str(interaction.author.id)]['Disabled Items'][item_type]
-        item_status = not item_status
-        settings[str(interaction.author.id)]['Disabled Items'][item_type] = item_status
-        with open("root/Satori/raffle_settings.json", "w+") as fp:
-            json.dump(settings, fp, indent=4)
-        content = None
-        if item_status == False:
-            content = f'You have enabled {item_emoji}'
-        else:
-            content = f'You have disabled {item_emoji}. This item can no longer be submitted.'
-        setting_embed_dict = raffle_settings_embed.to_dict()
 
-        for field in setting_embed_dict['fields']:
-            if field['name'] == 'Disabled Items':
-                value = field['value']
-                value = value.split(" ") if value != '[]' else []
-                if str(item_emoji) in value:
-                    value.remove(str(item_emoji))
-                else:
-                    value.append(str(item_emoji))
-                field['value'] = ' '.join(value) if value else '[]'
-                
-        e = discord.Embed.from_dict(setting_embed_dict)
-        await component_msg.edit(content=content, components=[])
-        await setting_msg.edit(embed=e, components=setting_comps)
+        while True:
+            try: 
+                item_select_interaction, item_button = await self.bot.wait_for('button_click', check=disable_item_check, timeout=10)
+            except asyncio.TimeoutError:
+                await component_msg.edit(content='Cancelled due to timeout.', components=[])
+                await setting_msg.edit(embed=raffle_settings_embed, components=setting_comps)
+                return
+            await item_select_interaction.defer()
+            if items_only and item_button.style == ButtonStyle.green:
+                count = sum(1 for item in item_val.values() if item)
+                if count >= 10:
+                    await component_msg.edit(content='At least one item must be enabled if `Item Only` is True. You have already disabled 10 items. Cannot disable more.')
+                    continue
+            item_type = item_button.custom_id[5:]
+            item_emoji = item_button.emoji
+            item_status = settings[str(interaction.author.id)]['Disabled Items'][item_type]
+            item_status = not item_status
+            settings[str(interaction.author.id)]['Disabled Items'][item_type] = item_status
+            with open("root/Satori/raffle_settings.json", "w+") as fp:
+                json.dump(settings, fp, indent=4)
+            content = None
+            if not item_status:
+                content = f'You have enabled {item_emoji}'
+                item_button.style = ButtonStyle.green
+            else:
+                content = f'You have disabled {item_emoji}. This item can no longer be submitted.'
+                item_button.style = ButtonStyle.red
+            setting_embed_dict = raffle_settings_embed.to_dict()
+            await asyncio.sleep(1)
+            for field in setting_embed_dict['fields']:
+                if field['name'] == 'Disabled Items':
+                    value = field['value']
+                    value = value.split(" ") if value != '[]' else []
+                    if str(item_emoji) in value:
+                        value.remove(str(item_emoji))
+                    else:
+                        value.append(str(item_emoji))
+                    field['value'] = ' '.join(value) if value else '[]'
+                    
+            new_comps = [ActionRow(), ActionRow(), ActionRow()]
+            update_butts = update_item_buttons(new_comps, item_val)
+            e = discord.Embed.from_dict(setting_embed_dict)
+            await component_msg.edit(content=content, components=update_butts)
+            await setting_msg.edit(embed=e, components=setting_comps)
 
     @commands.Cog.slash_command(
         base_name='raffle',
@@ -1220,51 +1394,51 @@ class DeathPoetsCog(commands.Cog):
         default_required_permissions=Permissions(manage_messages=True),
         guild_ids=[374716378655227914, 972473224845729802]
         )
-    async def raffle_test(self, ctx: APPCI):
-        global raffle_started
-        if not raffle_started:
-            raffle_started = False
+    async def raffle_test(self, ctx: APPCI): #Enters test mode
+        global raffle_started, active_msg
+        close_comp = [
+            Button(label='Add User',
+            custom_id='test_user',
+            style=ButtonStyle.green),
+            Button(label='Choose Winner',
+            custom_id='raffle_win',
+            style=ButtonStyle.green),
+            Button(label='Exit Test Mode',
+            custom_id='test_exit',
+            style=ButtonStyle.red)]
         if ctx.author == raffle_author:
             if raffle_started == True:
-                raffle_started = False
                 await ctx.defer()
-                close_comp = [ActionRow(
-                                Button(label='Add User',
-                                custom_id='test_user',
-                                style=ButtonStyle.green),
-                                Button(label='Information',
-                                custom_id='test_info',
-                                style=ButtonStyle.green),
-                                Button(label='Choose Winner',
-                                custom_id='raffle_win',
-                                style=ButtonStyle.green)
-                                )]
-                await _msg.edit(embed=raffle_embed, components=close_comp)
-                await ctx.respond('Test mode active.')
+                try:
+                    raffle_start_components[1].add_components(close_comp)
+                except:
+                    raffle_start_components.append(ActionRow())
+                    raffle_start_components[1].add_components(close_comp)
+                await _msg.edit(embed=raffle_embed, components=raffle_start_components)
+                active_msg = await ctx.respond('Test mode active.')            
             else:
                 await ctx.respond("No raffle found.", hidden=True)
-                return
         else:
             await ctx.respond("Only the raffle author can use this.", hidden=True)
+        return
+
+    @commands.Cog.on_click('test_exit')
+    async def exit_test_mode(self, int, but):
+        if int.author != raffle_author:
+            await int.respond('Only the raffle author can use this', hidden=True)
             return
+        await int.defer()
+        await active_msg.delete()
+        del raffle_start_components[1]
+        #raffle_start_components.pop(1)
+        await _msg.edit(embed=raffle_embed, components=raffle_start_components)           
 
     @commands.Cog.on_click('test_user')
     async def test_add_user(self, interaction, button):
         if interaction.author != raffle_author:
             await interaction.respond('Only the raffle author can use this', hidden=True)
             return
-        close_comp = [ActionRow(
-                                Button(label='Add User',
-                                custom_id='test_user',
-                                style=ButtonStyle.green),
-                                # Button(label='Information',
-                                # custom_id='test_info',
-                                # style=ButtonStyle.green),
-                                Button(label='Choose Winner',
-                                custom_id='raffle_win',
-                                style=ButtonStyle.green)
-                                )]
-        
+
         r = random.randint(1000, 9999)
         name = f'TestUser#{r}'
 
@@ -1276,7 +1450,7 @@ class DeathPoetsCog(commands.Cog):
         value = "\n".join([f"{k}x {v}" for k, v in submission.items()])
 
         raffle_embed.add_field(name=name, value=value)
-        await _msg.edit(embed=raffle_embed, components=close_comp)
+        await _msg.edit(embed=raffle_embed, components=raffle_start_components)
         await interaction.respond('User added.', hidden=True)
 
     @commands.Cog.on_click(r'^confirm(\D[0-9]+[\D]*)$')
@@ -1300,8 +1474,6 @@ class DeathPoetsCog(commands.Cog):
                         if str(submission_user) == field['name']:
                             submissions_count = 0
                             submissions_count += len(field["value"].split("\n"))
-                            print(submissions_count)
-                            print(raw_submission)
                             if len(raw_submission) + submissions_count > 8:
                                 submits_left = 8 - submissions_count
                                 await submission_message.edit(content=f'Too many submissions, {submission_user} has `{submits_left}` submissions left. ❌', components = [])
@@ -1342,15 +1514,13 @@ async def raffle_submission(self, interaction, submission, message = None):
     confirm_comps = [ActionRow(
                     Button(custom_id=f'confirm@{B_ID}',
                     style=ButtonStyle.grey,
-                    emoji= '✔️'),
+                    emoji= '✅'),
                     Button(custom_id=f'decline@{B_ID}',
                     style=ButtonStyle.grey, 
                     emoji= '❌')
     )]
-    ch = await self.bot.fetch_channel(1000872338973265940)
-
+    ch = await self.bot.fetch_channel(1071134900310257766)
     #1071134900310257766
-    
     embed_dict = raffle_embed.to_dict()
 
     for key, values in list(submission.items()):
@@ -1361,13 +1531,6 @@ async def raffle_submission(self, interaction, submission, message = None):
         for field in embed_dict['fields']:
             if field["name"] == str(interaction.author):
                 submissions_count += len(field["value"].split("\n"))
-        
-        # max_submissions = 8 - submissions_count
-        # if len(submission) > max_submissions:
-        #     te = value.split('\n')
-        #     value = '\n'.join(te[:max_submissions])
-        #     print('oik here')
-        #     print(value)
 
         if len(submission) + submissions_count > 8:
             submits_left = 8 - submissions_count
@@ -1388,7 +1551,8 @@ async def raffle_submission(self, interaction, submission, message = None):
     else:
         raffle_embed.add_field(name=f'{str(interaction.author)}', value=value)
         await _msg.edit(embed=raffle_embed)
-    
+
+
 async def start_logs(self, message):    #date of log starting 9/2/22
     with open("root/Satori/logs.json", "r") as f:
         logs = json.load(f)
@@ -1400,5 +1564,14 @@ async def start_logs(self, message):    #date of log starting 9/2/22
         logs[str(message.guild.id)]['Error Applying Role'] = 0
     with open("root/Satori/logs.json", "w+") as fp:
              json.dump(logs, fp, indent=4)
+
+async def app_accept(self, logs, message, interaction):
+        try:
+            logs[str(message.guild.id)]['Users'][str(interaction.author.id)]['Accepted'] += 1
+        except Exception as e:
+            gene = await self.bot.fetch_channel(972473224845729805)
+            
+            await gene.send(f"ACCEEPTED ERROR {e}")
+
 def setup(bot):
     bot.add_cog(DeathPoetsCog(bot))
