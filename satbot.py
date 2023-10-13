@@ -21,9 +21,9 @@ bot = commands.Bot(
   intents=intents, 
   help_command=None,
   sync_commands=True)
-initial_extensions = ['cogs.owner', 'cogs.nsfw', 'cogs.deathpoets', 'cogs.test', 'cogs.econ', 'cogs.pins']
+initial_extensions = ['cogs.deathpoets']
 
-        #big nut!
+  
 @bot.event
 async def on_ready():
     #global start_time
